@@ -2,7 +2,7 @@ clear all
 close all
 clc
 
-global InitialThreshold DotSize Num_Reinforce Slope i A b W0 Wc tf Click DotLoc Yes No Threshold Click_Count
+global InitialThreshold DotSize Num_Reinforce Slope i A b W0 Wc tf Click DotLoc Yes No Threshold Click_Count Target_click
 
 %% Initialization
 black = [0 0 0];
@@ -193,9 +193,14 @@ WaitSecs(1);
 
 Threshold = [];
 Target_Rect = [];
+W0 = InitialThreshold;
+Wc = DotSize;
+tf = Num_Reinforce;
 
 %% Trial loop
 for i = 1:num_trial   % Number of trials
+    
+    Target_click{i,1}(1,1)=0; %Initialize
     
     if order{1,i} == 1
         order{2,i} = 'Linear';
@@ -203,9 +208,7 @@ for i = 1:num_trial   % Number of trials
         
     elseif order{1,i} == 2
         order{2,i} = 'Convex';
-        W0 = InitialThreshold;
-        Wc = DotSize;
-        tf = Num_Reinforce;
+
         b = 0.3;  % Define b value for convex
         A = (Wc-W0)/(1-exp(b*tf));
         
@@ -216,9 +219,7 @@ for i = 1:num_trial   % Number of trials
         
     elseif order{1,i} == 3
         order{3,i} = 'Concave';
-        W0 = InitialThreshold;
-        Wc = DotSize;
-        tf = Num_Reinforce;
+
         b = -0.3;  % Define b value for convex
         A = (Wc-W0)/(1-exp(b*tf));
         
@@ -260,6 +261,7 @@ temp = InitialThreshold;
 
 for j = 1:100    % Number of clicks until reaching threshold 15 times overall
 
+    
 StartTime{i,1}(j,1) = GetSecs;
     
 % Get mouse click info 
@@ -383,10 +385,14 @@ else
 end
     
          
-    
-   if Count >= num_pass   
-      WaitSecs(0.5);
+%    % Accumulated clicks within threshold for num_pass times
+%    if Count >= num_pass   
+%       WaitSecs(0.5);
       
+      
+   % Consecutive clicks within threshold for 10 times   
+   if max(diff([0 (find(~(Target_click{i,1} > 0))') numel(Target_click{i,1})' + 1]) - 1) >= 10
+      WaitSecs(0.5);
       
 
 
@@ -449,7 +455,7 @@ end
         
  
 end
-       
+ 
 end    % i
 
 
@@ -469,6 +475,7 @@ Results.ResponseTime = ResponseTime;
 Results.Yes = Yes;
 Results.No = No;
 Results.Order = order;
+Results.TargetClick = Target_click;
 
 % elseif QuitProgram == 1
 % error('Not enough inputs. Please restart program.')
