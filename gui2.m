@@ -11,7 +11,8 @@ end
 fig_h = figure;
 ax=gca;
 set(gcf,'toolbar','figure');
-set(gcf, 'Position', get(0,'MonitorPositions'));
+mp = get(0,'MonitorPositions')
+set(gcf, 'Position', mp(1,:));
 ax.Position(1) = 0.2; 
 hold on;
 
